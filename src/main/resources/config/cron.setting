@@ -1,0 +1,3 @@
+# 中括号写到类所在的包，配置项写到类名和方法名
+[com.third.easyprice.cronTest]
+CronTest.start = 0/1 * * * * ? *

@@ -17,61 +17,58 @@ import java.util.Map;
 public class ShopServiceImpl implements ShopService {
 
     @Autowired
-    private ShopDao shopDao ;
+    private ShopDao shopDao;
 
     @Override
-    public List<Shop> queryByName(List<Map<String , Object>> json , String key) {
+    public List<Shop> queryByName(List<Map<String, Object>> json, String key) {
 
-        if (json.isEmpty()){
-            return null ;
+        if (json.isEmpty()) {
+            return null;
         }
-
         List<Shop> resultList = new LinkedList<>();
 
-        for (Map map : json){
+        for (Map map : json) {
             String score = map.get("score").toString();
-            if (Double.parseDouble(score) >= 0.5){
+            if (Double.parseDouble(score) >= 0.5) {
                 List<Shop> result = shopDao.queryByName(map.get("keyword").toString().trim());
                 resultList.addAll(result);
             }
         }
         StringBuilder sb = new StringBuilder();
 
-        for (Shop shop : resultList){
+        for (Shop shop : resultList) {
             sb.append("'");
             sb.append(shop.getProductId());
             sb.append("'");
             sb.append(",");
         }
         String ids = sb.toString();
-        if (!StringUtils.isBlank(ids)){
-            ids = ids.substring(0,ids.length()-1);
+        if (!StringUtils.isBlank(ids)) {
+            ids = ids.substring(0, ids.length() - 1);
         }
 
-        Jedis jedis = new Jedis("111.231.232.212" , 6379);
-        jedis.auth("redisroot");
-        jedis.set("123456789" , ids);
+        Jedis jedis = new Jedis("127.0.0.1", 6379);
+
+        jedis.set("123456789", ids);
 
         return resultList;
     }
 
     /**
-     *  根据排列要求排序
+     * 根据排列要求排序
+     *
      * @param
      * @return
      */
     @Override
     public List<Shop> orderList(String type) {
-
-        Jedis jedis = new Jedis("111.231.232.212" , 6379);
-        jedis.auth("redisroot");
+        Jedis jedis = new Jedis("127.0.0.1", 6379);
         String ids = jedis.get("123456789");
-
-        Map<String , String > map = new HashMap<>();
+        Map<String, String> map = new HashMap<>();
         map.put("ids", ids);
         // 0.天猫  1.京东  2.苏宁 4.升序 5.降序
-        map.put("key" , type);
+        map.put("key", type);
         List<Shop> list = shopDao.orderList(map);
-        return list ;
+        return list;
     }
 }
